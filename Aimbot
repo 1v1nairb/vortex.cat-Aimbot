@@ -11,6 +11,7 @@ local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local Cam = game.Workspace.CurrentCamera
 local StarterGui = game:GetService("StarterGui")
+local GuiService = game:GetService("GuiService")
 
 StarterGui:SetCore("SendNotification", {
     Title = "KKJ AIMBOT",
@@ -25,6 +26,28 @@ FOVring.Color = Color3.fromRGB(0, 255, 0)
 FOVring.Filled = false
 FOVring.Radius = fov
 FOVring.Position = Cam.ViewportSize / 2
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local ejectButton = Instance.new("TextButton")
+ejectButton.Size = UDim2.new(0, 250, 0, 60)
+ejectButton.Position = UDim2.new(1, -260, 1, -70)
+ejectButton.Text = "Ejetar"
+ejectButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ejectButton.BackgroundTransparency = 0.5
+ejectButton.BorderSizePixel = 2
+ejectButton.BorderColor3 = Color3.fromRGB(169, 169, 169)
+ejectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ejectButton.Font = Enum.Font.SourceSans
+ejectButton.TextSize = 24
+ejectButton.Parent = screenGui
+
+local uicorner = Instance.new("UICorner")
+uicorner.CornerRadius = UDim.new(0, 15)
+uicorner.Parent = ejectButton
+
+local connections = {}
 
 local function updateDrawings()
     FOVring.Position = Cam.ViewportSize / 2
@@ -75,7 +98,20 @@ local function onInputBegan(input, gameProcessed)
     end
 end
 
-UserInputService.InputBegan:Connect(onInputBegan)
+table.insert(connections, UserInputService.InputBegan:Connect(onInputBegan))
+
+ejectButton.MouseButton1Click:Connect(function()
+    for _, conn in ipairs(connections) do
+        conn:Disconnect()
+    end
+    FOVring:Remove()
+    screenGui:Destroy()
+    StarterGui:SetCore("SendNotification", {
+        Title = "KKJ AIMBOT",
+        Text = "Aimbot Ejetado.",
+        Duration = 5
+    })
+end)
 
 RunService.RenderStepped:Connect(function()
     updateDrawings()
@@ -83,7 +119,7 @@ RunService.RenderStepped:Connect(function()
     if aiming then
         local closestPlayers = getClosestPlayersInFOV()
         if #closestPlayers > 0 then
-            local targetPlayer = closestPlayers[1].player -- Mira no mais próximo dos 3 dentro da distância limite
+            local targetPlayer = closestPlayers[1].player
             if targetPlayer and targetPlayer.Character:FindFirstChild("Head") then
                 lookAt(targetPlayer.Character.Head.Position)
             end
