@@ -1,4 +1,4 @@
-local fov = 50
+local fov = 70
 local maxPlayers = 3
 local maxDistance = 150
 local maxTransparency = 0.1
